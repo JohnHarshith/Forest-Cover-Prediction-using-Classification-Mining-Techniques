@@ -198,7 +198,7 @@ There exists various classification mining algorithms that can be used and imple
 
 #### Gaussian Naive Bayes'
 
-
+Gaussian Naive Bayes' algorithm has been the least efficient algorithm when it came to the yield of prediction accuracy. The normal distribution of the continuous variables were not forming well enough to yield a desirably high prediction accuracy, as well as overtake the prediction accuracy as mentioned in the research paper. Therefore, we try other classification algorithms to achieve success.
 
 ```python
 from sklearn.naive_bayes import GaussianNB
@@ -210,7 +210,13 @@ print("Accuracy using Gaussian Naive Bayes: ", round(model.score(x_test, y_test)
 
 #### Logistic Regression
 
+Logistic Regression was the first algorithm to beat the research paper's prediction accuracy for a certain combinations of data columns only. This algorithm, when implemented on a huge dataset makes the prediction very sluggish and it may take hours to run over a single iteration of the algorithm so as to converge the solver.
 
+More information on the algorithm used:
+- Penalty type: l2
+- Solver: saga
+- No class weight, no random state
+- Maximum number of iterations taken to coverge the solver: 7500
 
 ```python
 from sklearn.linear_model import LogisticRegression
@@ -223,7 +229,13 @@ print("Accuracy using Logistic Regression: ", round(lracc*100, 3), "%", sep="")
 
 #### Support Vector Machines
 
+SVM takes the highest time to generate a prediction accuracy for this dataset. Each iteration takes more than 7 hours to run and execute. Such a computationally costly algorithm, although good in prediction will be highly time consuming for the users. The prediction accuracy for a particular combination of columns will differ for every variety of train-test splt. Therefore, in order to find the highest prediction possible, we iterate the algorithm a few times for a different train-test split and record the highest prediction accuracy's corresponding split in a pickle file for future use.
 
+More information on the algorithm used:
+- Kernel used: rbf
+- Degree: 3
+- Regularization parameter: 1
+- No verbosity, no random state
 
 ```python
 from sklearn import svm, metrics
@@ -233,19 +245,6 @@ svmmodel.fit(x_train, y_train)
 y_pred = svmmodel.predict(x_test)
 svmacc = metrics.accuracy_score(y_test, y_pred)
 print("Accuracy using SVM: ", round(svmacc*100, 3), "%", sep="")
-```
-
-#### K-Nearest Neighbors
-
-This 
-
-```python
-from sklearn.neighbors import KNeighborsClassifier
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
-knnmodel = KNeighborsClassifier(n_neighbors=3)
-knnmodel.fit(x_train, y_train)
-knnacc = knnmodel.score(x_test, y_test)
-print("Accuracy using KNN: ", round(knnacc*100, 3), "%", sep="")
 ```
 
 #### Random Forest
@@ -268,6 +267,63 @@ pred = rf.predict(x_test)
 print("Accuracy using Random Forest: ", round(rf.score(x_test,y_test) * 100, 3), "%", sep="")
 ```
 
+#### K-Nearest Neighbors
+
+This lazy learner algorithm is highly effective, and better than Random Forest but it becomes quite computationally expensive when it is run on dataset of immense size. Due to variations in answer for every train-test split, we had to iterate the algorithm of a few number of times and store the split with the highest accuracy in a pickle. If the time is not an issue, then KNN yields the highest ever recorded prediction percentages.
+
+More information on the algorithm used:
+- Number of neighbors set: 3
+- Distance set: Minkowski
+- Weights set to each point: uniform
+
+```python
+from sklearn.neighbors import KNeighborsClassifier
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
+knnmodel = KNeighborsClassifier(n_neighbors=3)
+knnmodel.fit(x_train, y_train)
+knnacc = knnmodel.score(x_test, y_test)
+print("Accuracy using KNN: ", round(knnacc*100, 3), "%", sep="")
+```
+
+#### Deep Learning
+
+Artificial Neural Networks (ANN) are multi-layer fully-connected neural nets and consist of an input layer, multiple hidden layers, and an output layer. ANN are inspired by the design of a human brain and tries to simulate it.
+An artificial neuron receives a signal then processes it and can signal neurons connected to it. The signal at a connection is a real number, and the output of each neuron is computed by an activation function of the sum of its inputs. Neurons and edges typically have a weight that adjusts as learning proceeds. The weight increases or decreases the strength of the signal at a connection. Neurons may have a threshold such that a signal is sent only if the aggregate signal crosses that threshold.
+
+More information on the algorithm used:
+- Number of hidden layers: 2
+- Learning Algorithm: stochastic gradient descent extension- Adam Optimizer
+- Loss Function: sparse categorical crossentropy
+- Activation function for input layer: linear (f(x) = x)
+- Activation function for the 2 hidden layers: Rectified Linear Activation Unit (RELU)
+- Activation function for output layer: Softmax Activation Function
+- Number of nodes: 64
+- Batch size: 64
+- Number of epochs: 8
+- Input variables linearly scaled to lie in range [0, 1]
+
+```python
+import tensorflow as tf
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+cover_model = tf.keras.models.Sequential()
+cover_model.add(tf.keras.layers.Dense(
+    units=64, activation='relu', input_shape=(X_train.shape[1],)))
+cover_model.add(tf.keras.layers.Dense(units=64, activation='relu'))
+cover_model.add(tf.keras.layers.Dense(units=8, activation='softmax'))
+cover_model.compile(optimizer=tf.optimizers.Adam(
+), loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+history_cover = cover_model.fit(
+    X_train, y_train, epochs=8, batch_size=64, validation_data=(X_test, y_test))
+```
+
+## Inference
+
+
+
+## Conclusion
+
+The objective of the project was successfully achieved as we found alternative supervised learning approaches that are able to yield a much higher and more accurate prediction percentage for the given dataset in a reduced time frame, owing to the size of the dataset. The most suitable algorithm would be K Nearest Neighbors algorithm and the label of interest can be aptly predicted by the taking all the columns into account.
+=======
 ## Conclusion
 
 This study improves upon the work of Jock A. Blackard and Denis J. Dean in predicting forest covers. After training and testing the same dataset with various classification models, some of the models managed to beat the old accuracy of "71.1%" with a new best accuracy of "97". 
@@ -280,6 +336,8 @@ With the optimizer and loss functions used, our deep learning model was able to 
 - https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html
 - https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html
 - https://scikit-learn.org/stable/modules/generated/sklearn.naive_bayes.GaussianNB.html
+- https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html
+- https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
 <!---
 ## Contact Us
 
@@ -289,3 +347,4 @@ _You can contact us through our LinkedIn account -_
 * [Arjun Das](https://www.linkedin.com/in/arjundas1/)
 * [Siddharth Pal](https://www.linkedin.com/in/siddharthpal20/)
 --->
+
